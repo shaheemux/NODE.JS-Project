@@ -50,4 +50,8 @@ export default {
 
 <style scoped>
 
+button{
+    padding: 1rem;
+}
+
 </style>
