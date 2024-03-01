@@ -2,27 +2,23 @@
     <div class="container">
       <div class="row">
         <div class="col">
-          <input type="text" placeholder="Search product by name" class="form-control">
+          <input v-model="searchQuery" type="text" placeholder="Search product by name" class="form-control">
         </div>
         <div class="col">
-          <button class="btn btn-success">Sorting by price</button>
+          <button @click="toggleSorting" class="btn btn-success">{{ sorting ? 'Sorting by price' : 'Sorting by name' }}</button>
         </div>
       </div>
-      <div class="row" v-if="products">
-        <Card v-for="product in products" :key="product.prodID">
-          <template #cardHeader>
-            <h4 class="card-title">{{ product.prodName }}</h4>
-          </template>
-          <template #cardBody>
-            <p class="card-text text-dark bg-gradient bg-dark-subtle p-2">
-              Quantity: {{ product.prodQuantity }}
-            </p>
-            <p class="card-text text-dark bg-gradient bg-dark-subtle p-2">
-              Amount: R{{ product.prodAmount }}
-            </p>
-            <router-link :to="{name: 'product', params: {id: product.prodID}}">View More</router-link>
-          </template>
-        </Card>
+      <div class="row mt-3" v-if="products">
+        <div class="col-md-4" v-for="product in filteredProducts" :key="product.id">
+          <div class="card">
+            <img :src="product.prod_url" class="card-img-top" alt="Product Image">
+            <div class="card-body">
+              <h5 class="card-title">{{ product.prod_name }}</h5>
+              <p class="card-text">Price: R{{ product.price }}</p>
+              <p class="card-text">Quantity: {{ product.quantity }}</p>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="row" v-else>
         <p class="lead">Loading</p>
@@ -31,24 +27,49 @@
   </template>
   
   <script>
-  import Card from '@/components/Card.vue';
   export default {
-    name: 'ProductsView',
-    components: {
-      Card
+    computed: {
+      products() {
+        return this.$store.state.products;
+      },
+      filteredProducts() {
+        let filtered = this.products;
+        if (this.searchQuery) {
+          filtered = filtered.filter(product => product.prod_name.toLowerCase().includes(this.searchQuery.toLowerCase()));
+        }
+        if (this.sorting) {
+          filtered = filtered.sort((a, b) => a.price - b.price);
+        } else {
+          filtered = filtered.sort((a, b) => a.prod_name.localeCompare(b.prod_name));
+        }
+        return filtered;
+      },
     },
-    computed:{
-      products(){
-        return this.$store.state.products
-      }
+    data() {
+      return {
+        searchQuery: '',
+        sorting: false,
+      };
+    },
+    methods: {
+      toggleSorting() {
+        this.sorting = !this.sorting;
+      },
     },
     mounted() {
-      this.$store.dispatch('fetchProducts')
-    }
-  }
+      this.$store.dispatch('fetchProducts');
+    },
+  };
   </script>
   
   <style scoped>
-  
+  .card {
+    margin-bottom: 20px;
+  }
+  .product-image {
+    max-width: 100px;
+    max-height: 100px;
+    border-radius: 10px;
+  }
   </style>
   

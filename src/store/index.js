@@ -1,214 +1,184 @@
+
+
+// import { createStore } from 'vuex';
+// import axios from 'axios';
+// import sweet from 'sweetalert';
+// import AuthenticateUser from '@/service/AuthenticateUser';
+// const lifeURL = 'https://node-js-project-974l.onrender.com/'
+// export default createStore({
+//   state: {
+//     products: null
+//   },
+//   mutations: {
+//     setproducts(state, products) {
+//       state.products = products;
+//     }
+//   },
+//   actions: {
+//     async fetchproducts(context) {
+//       try {
+//         let { results } = await axios.get(`${lifeURL}products`);
+//         if (results) {
+//           context.commit('setproducts', results);
+//         }
+//       } catch (e) {
+//         sweet({
+//           title: 'Error',
+//           text: 'An error occurred when retrieving products.',
+//           icon: 'error',
+//           timer: 2000
+//         });
+//       }
+//     }
+//   }
+// });
+
+
 import { createStore } from 'vuex'
 import axios from 'axios'
-import sweet from 'sweetalert'
-import { useCookies } from 'vue3-cookies'
-const {cookies} = useCookies()
-import router from '@/router'
-import AuthenticateUser from '@/service/AuthenticateUser'
-const lifeURL = 'https://lifechoicesapp-dddy.onrender.com/'
+const lifeURL = 'https://node-js-project-974l.onrender.com/'
 
 export default createStore({
   state: {
     users: null,
     user: null,
     products: null,
-    product: null
+    product: null,
+    spinner: false,
+    token: null,
+    msg: null
   },
   getters: {
   },
   mutations: {
-    setUsers(state, value) {
-      state.users = value
+    setUsers(state, users){
+      state.users =users
     },
-    setUser(state, value) {
-      state.user = value
+    setUser(state, user){
+      state.user =user
     },
-    setProducts(state, value) {
-      state.products = value
+    setProducts(state, products){
+      state.products =products
     },
-    setProduct(state, value) {
-      state.product = value
+    setProduct(state, product){
+      state.product = product
+    },
+    setSpinner(state, value){
+      state.spinner = value
+    },
+    setToken(state, token){
+      state.token = token
+    },
+    setDeletionStatus(state, status) {
+      state.deletionStatus = status;
+    },
+    deleteUser(state, userID) {
+      const index = state.users.findIndex(user => user.userId === userID);
+      if (index !== -1) {
+        state.users.splice(index, 1);
+      }
     },
   },
   actions: {
-    async register(context, payload) {
-      try{
-        let {msg} = (await axios.post(`${lifeURL}users/register`, payload)).data
-        if(msg) {
-          context.dispatch('fetchUsers')
-          sweet({
-            title: 'Registration',
-            text: msg,
-            icon: "success",
-            timer: 2000
-          }) 
-          //  
-          router.push({name: 'login'})
-        }
-      }catch(e) {
-        sweet({
-          title: 'Error',
-          text: 'Please try again later',
-          icon: "error",
-          timer: 2000
-        }) 
-      }
-    },
     async fetchUsers(context) {
       try{
-        let {results} = (await axios.get(`${lifeURL}users`)).data
-        if(results) {
-          context.commit('setUsers', results)
-        }
-      }catch(e) {
-        sweet({
-          title: 'Error',
-          text: 'An error occurred when retrieving users.',
-          icon: "error",
-          timer: 2000
-        }) 
+        const {data} = await axios.get(`${lifeURL}users`)
+        // console.log(data)
+        context.commit("setUsers", data.results)
+        console.log(data.results);
+      }catch(e){
+        context.commit("setMsg", "An error occured.")
       }
     },
-    async fetchUser(context, payload) {
-      try{
-        let {result} = (await axios.get(`${lifeURL}users/${payload.id}`)).data
-        if(result) {
-          context.commit('setUser', result)
-        }else {
-          sweet({
-            title: 'Retrieving a single user',
-            text: 'User was not found',
-            icon: "info",
-            timer: 2000
-          }) 
-        }
-      }catch(e) {
-        sweet({
-          title: 'Error',
-          text: 'A user was not found.',
-          icon: "error",
-          timer: 2000
-        }) 
-      }
-    },
-    async updateUser(context, payload) {
-      try{
-        let {msg} = await axios.patch(`${lifeURL}users/update/${payload.id}`)
-        if(msg) {
-          context.dispatch('fetchUsers')
-          sweet({
-            title: 'Update user',
-            text: msg,
-            icon: "success",
-            timer: 2000
-          }) 
-        }
-      }catch(e) {
-        sweet({
-          title: 'Error',
-          text: 'An error occurred when updating a user.',
-          icon: "success",
-          timer: 2000
-        }) 
-      }
-    },
-    async deleteUser(context, payload) {
-      try{
-        let {msg} = await axios.delete(`${lifeURL}users/${payload.id}`)
-        if(msg) {
-          context.dispatch('fetchUsers')
-          sweet({
-            title: 'Delete user',
-            text: msg,
-            icon: "success",
-            timer: 2000
-          }) 
-        }
-      }catch(e) {
-        sweet({
-          title: 'Error',
-          text: 'An error occurred when deleting a user.',
-          icon: "error",
-          timer: 2000
-        }) 
-      }
-    },
-    async login(context, payload) {
-      try{
-       const {msg, token, result} = (await axios.post(`${lifeURL}users/login`, payload)).data 
-       if(result){
-        context.commit('setUser', {msg, result})
-        cookies.set('LegitUser', {
-          msg, token, result
-        })
-        AuthenticateUser.applyToken(token)
-        sweet({
-          title: msg,
-          text: `Welcome back, 
-          ${result?.firstName} ${result?.lastName}`,
-          icon: "success",
-          timer: 2000
-        })
-          router.push({name: 'home'})
-        }else {
-          sweet({
-            title: 'info',
-            text: msg,
-            icon: "info",
-            timer: 2000
-          })
-        }
-      }catch(e) {
-        sweet({
-          title: 'Error',
-          text: 'Failed to login.',
-          icon: "error",
-          timer: 2000
-        })
-      }
-      
-
-    },
+    
     async fetchProducts(context) {
       try{
-        let {results} = 
-        (await axios.get(`${lifeURL}products`)).data
-        if(results) {
-          context.commit('setProducts', results)
-        }
-      }catch(e) {
-        sweet({
-          title: 'Error',
-          text: 'An error occurred when retrieving products.',
-          icon: "error",
-          timer: 2000
-        }) 
+        const {data} = await axios.get(`${lifeURL}products`)
+        console.log(data);
+        context.commit("setProducts", data)
+      }catch(e){
+        context.commit("setMsg", "An error occured.")
       }
     },
-    async fetchProduct(context, payload) {
-      try{
-        let {result} = (await axios.get(`${lifeURL}products/${payload.id}`)).data
-        if(result) {
-          context.commit('setProduct', result)
-        }else {
-          sweet({
-            title: 'Retrieving a single product',
-            text: 'Product was not found',
-            icon: "info",
-            timer: 2000
-          }) 
+    async fetchProduct(context, id) {
+      try {
+        const { data } = await axios.get(`${lifeURL}products/${id}`);
+        context.commit("setProduct", data.result[0]);
+        console.log(data.result);
+      } catch (e) {
+        context.commit("setMsg", "An error occurred.");
+      }
+    },
+
+     // Action to delete a user
+     async deleteUser(context, userID) {
+      try {
+        context.commit("setDeletionStatus", null);
+
+        const response = await axios.delete(`${lifeURL}user/${userID}`);
+
+        if (response.status !== 200) {
+          throw new Error(`Failed to delete user. Status: ${response.status}`);
         }
-      }catch(e) {
-        sweet({
-          title: 'Error',
-          text: 'A product was not found.',
-          icon: "error",
-          timer: 2000
-        }) 
+
+        // You don't need to commit "deleteUser" mutation here
+        context.commit("setDeletionStatus", "success");
+      } catch (error) {
+        console.error("Error deleting user:", error);
+        context.commit("setDeletionStatus", "error");
+      }
+    },
+
+    
+    async deleteProduct(context, id) {
+      try {
+        context.commit("setDeletionStatus", null);
+        
+        const response = await axios.delete(`${lifeURL}products/${id}`);
+        
+        if (response.status !== 200) {
+          throw new Error(`Failed to delete product. Status: ${response.status}`);
+        }
+        
+        context.commit("removeProduct", id);
+        context.commit("setDeletionStatus", "success");
+      } catch (error) {
+        console.error("Error deleting product:", error);
+        context.commit("setDeletionStatus", "error");
+      }
+    },
+     updateProduct(context, updatedData) {
+      try {
+        const response = axios.put(`${lifeURL}products/${updatedData.prodID}`, updatedData);
+        
+        if (response.status !== 200) {
+          throw new Error(`Failed to update product. Status: ${response.status}`);
+        }
+        
+        context.commit("updateProduct", { id, updatedData });
+        context.commit("setEditStatus", "success");
+      } catch (error) {
+        console.error("Error editing product:", error);
+        context.commit("setEditStatus", "error");
+      }
+    },
+    async updateUser(context, { id, updatedData }) {
+      try {
+        const response = await axios.patch(`${lifeURL}/user/${userID}`, updatedData);
+        
+        if (response.status !== 200) {
+          throw new Error(`Failed to update user. Status: ${response.status}`);
+        }
+        context.commit("updateUser", { id, updatedData });
+        context.commit("setEditStatus", "success");
+      } catch (error) {
+        console.error("Error editing product:", error);
+        context.commit("setEditStatus", "error");
       }
     }
-    
   },
   modules: {
   }
 })
+
+
