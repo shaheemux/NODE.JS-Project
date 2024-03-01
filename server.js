@@ -9,7 +9,7 @@ config()
 
 
 const app = express()
-const port = +process.env.PORT || 8001
+const port = +process.env.MYSQL_ADDON_PORT || 3000
 
 
 app.use(cors())
