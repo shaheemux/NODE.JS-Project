@@ -1,39 +1,3 @@
-
-
-// import { createStore } from 'vuex';
-// import axios from 'axios';
-// import sweet from 'sweetalert';
-// import AuthenticateUser from '@/service/AuthenticateUser';
-// const lifeURL = 'https://node-js-project-974l.onrender.com/'
-// export default createStore({
-//   state: {
-//     products: null
-//   },
-//   mutations: {
-//     setproducts(state, products) {
-//       state.products = products;
-//     }
-//   },
-//   actions: {
-//     async fetchproducts(context) {
-//       try {
-//         let { results } = await axios.get(`${lifeURL}products`);
-//         if (results) {
-//           context.commit('setproducts', results);
-//         }
-//       } catch (e) {
-//         sweet({
-//           title: 'Error',
-//           text: 'An error occurred when retrieving products.',
-//           icon: 'error',
-//           timer: 2000
-//         });
-//       }
-//     }
-//   }
-// });
-
-
 import { createStore } from 'vuex'
 import axios from 'axios'
 const lifeURL = 'https://node-js-project-974l.onrender.com/'
