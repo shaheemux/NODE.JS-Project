@@ -63,16 +63,6 @@ const editUser =async(First_name,Last_name,User_age,Gender,User_role,Email_add,U
     //  return getProducts()
 }
 
-    //  {
-    //     "First_name": "Shaheem ",
-    //     "Last_name": "Salie",
-    //     "User_age": 24,
-    //     "Gender": "Male",
-    //     "User_role": "Admin",
-    //     "Email_add": "Shaheemsalie@gmail.com",
-    //     "User_pass": "shaheem1973",
-    //     "User_Profile": "S.S"
-    //   }
 
 const addUser=async(UserId,First_name,Last_name,User_age,Gender,User_role,Email_add,User_pass,User_Profile)=>{
     await pool.query(`
